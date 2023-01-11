@@ -13,6 +13,8 @@ using AvaloniaTestingApp.Models;
 using HtmlAgilityPack;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Interactions;
+using ReactiveUI;
 using static System.Net.WebRequestMethods;
 using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 
@@ -20,9 +22,13 @@ namespace AvaloniaTestingApp.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Welcome to Avalonia!";
         public string Url => "https://music.amazon.com/playlists/B01M11SBC8";
-        PlaylistModel Playlist { get; set; }
+        PlaylistModel _playlistModel;
+        PlaylistModel Playlist
+        { 
+            get => _playlistModel;
+            set => this.RaiseAndSetIfChanged(ref _playlistModel, value);
+        }
 
         public MainWindowViewModel() 
         {
@@ -30,12 +36,11 @@ namespace AvaloniaTestingApp.ViewModels
             //Playlist = GetPlaylist(Url);
         }
 
-        public PlaylistModel GetPlaylist(string url)
+        public void GetPlaylist()
         {
             IWebDriver driver = new ChromeDriver();
-            driver.Navigate().GoToUrl(url);
-            System.Threading.Thread.Sleep(3000);
-            WebClient wc = new WebClient();
+            driver.Navigate().GoToUrl(Url);
+            System.Threading.Thread.Sleep(3000); //wait for website to load
 
             PlaylistModel playlist = new PlaylistModel();
             playlist.Songs = new List<SongModel>();
@@ -48,8 +53,12 @@ namespace AvaloniaTestingApp.ViewModels
             string[] tmp = shadowContent.Text.Split("\n");
             playlist.Name = tmp[1].Split("\r")[0];
             playlist.Description = tmp[2].Split("\r")[0];
-            Stream stream = wc.OpenRead(shadowHost.GetAttribute("image-src"));
+
+            WebClient wc = new WebClient();
+            byte[] imgBytes = wc.DownloadData(shadowHost.GetAttribute("image-src").ToString());
+            Stream stream = new MemoryStream(imgBytes);
             playlist.Image = Avalonia.Media.Imaging.Bitmap.DecodeToWidth(stream, 200);
+
             var nodes = doc.DocumentNode.SelectNodes("//music-container/div/div[2]/div/div/music-image-row");
             foreach (var node in nodes)
             {
@@ -73,7 +82,7 @@ namespace AvaloniaTestingApp.ViewModels
                 playlist.Songs.Add(song);
             }
 
-            return playlist;
+            Playlist = playlist;
 
             //First attempt of realisation with HtmlAgilityPack only, can't get shadow-root, cant accest website without web browser
             //

@@ -14,14 +14,11 @@
 
 	<Grid ColumnDefinitions="*,8*,*">
 		<StackPanel Grid.Column="1">
-			<TextBlock Text="{Binding Greeting}" />
-			<TextBlock Text="123" />
-			<TextBlock Text="{Binding Playlist.Name}" />
-			<TextBlock Text="{Binding Playlist.Description}"/>
-			<Grid ColumnDefinitions="2*, 4*">
-				<Grid Grid.Column="1" RowDefinitions="2*, 4*">
-					<TextBlock Grid.Row="0" Text="123" />
-					<TextBlock Grid.Row="1" Text="{Binding Greeting}" />
+			<Button Command="{Binding GetPlaylist}">Get playlist</Button>
+			<Grid ColumnDefinitions="200, *">
+				<Grid Grid.Column="1" RowDefinitions="2*, 4*" Height="200">
+					<TextBlock Grid.Row="0" Text="{Binding Playlist.Name}" />
+					<TextBlock Grid.Row="1" Text="{Binding Playlist.Description}"/>
 				</Grid>
 				<Image Grid.Column="0" Source="{Binding Playlist.Image}" Height="200" Width="200"/>
 			</Grid>
