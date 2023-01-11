@@ -11,7 +11,7 @@ namespace AvaloniaTestingApp.Models
     {
         public string Name { get; set; }
         public string Description { get; set;}
-        public string Image { get; set; }
+        public Avalonia.Media.Imaging.Bitmap Image { get; set; }
         public List<SongModel> Songs { get; set; }
     }
 }
