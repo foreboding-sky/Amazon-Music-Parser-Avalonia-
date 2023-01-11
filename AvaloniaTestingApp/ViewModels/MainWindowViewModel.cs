@@ -90,9 +90,6 @@ namespace AvaloniaTestingApp.ViewModels
 
                 //get song duration
                 string[] time = node.InnerHtml.Split("col4")[1].Split("title=\"")[1].Split("\"")[0].Split(":");
-                //string[] t1 = t[1].Split("title=\"");
-                //string[] t2 = t1[1].Split("\"");
-                //string[] t3 = t2[0].Split(":");
                 song.Duration = new TimeOnly(0, int.Parse(time[0]), int.Parse(time[1]));
 
                 playlist.Songs.Add(song);
