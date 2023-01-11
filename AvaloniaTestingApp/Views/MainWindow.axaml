@@ -12,16 +12,32 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-	<Grid ColumnDefinitions="*,8*,*">
-		<StackPanel Grid.Column="1">
-			<Button Command="{Binding GetPlaylist}">Get playlist</Button>
-			<Grid ColumnDefinitions="200, *">
-				<Grid Grid.Column="1" RowDefinitions="2*, 4*" Height="200">
-					<TextBlock Grid.Row="0" Text="{Binding Playlist.Name}" />
-					<TextBlock Grid.Row="1" Text="{Binding Playlist.Description}"/>
-				</Grid>
-				<Image Grid.Column="0" Source="{Binding Playlist.Image}" Height="200" Width="200"/>
-			</Grid>
-		</StackPanel>
+	<Grid RowDefinitions="50, 200, *" Margin="50,0,50,0">
+		<Grid Grid.Row="0" ColumnDefinitions="180, *, 120" VerticalAlignment="Center">
+			<TextBlock Grid.Column="0" VerticalAlignment="Center" FontSize="16">Amazon music playlist:</TextBlock>
+			<TextBox Grid.Column="1" VerticalAlignment="Center" Height="40" Text="{Binding Url}"></TextBox>
+			<Button Grid.Column="2" Command="{Binding ParseUrl}" VerticalAlignment="Center" Height="40" FontSize="16" VerticalContentAlignment="Center">Get playlist</Button>
+		</Grid>
+		<Grid Grid.Row="1" ColumnDefinitions="200, *" Margin="5">
+			<Image Grid.Column="0" Source="{Binding Playlist.Image}" Height="200" Width="200"/>
+			<Grid Grid.Column="1" RowDefinitions="2*, 4*" Height="200" Margin="5">
+				<TextBlock Grid.Row="0" Text="{Binding Playlist.Name}" VerticalAlignment="Center" FontSize="50"/>
+				<TextBlock Grid.Row="1" Text="{Binding Playlist.Description}" VerticalAlignment="Center" FontSize="20"/>
+			</Grid>	
+		</Grid>
+		<ListBox Grid.Row="2" Items="{Binding Playlist.Songs}" Margin="5">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<Grid ColumnDefinitions="50,4*,*">
+						<Image Grid.Column="0" Source="{Binding Image}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+						<Grid Grid.Column="1" RowDefinitions="*,*" Height="50" Margin="5">
+							<TextBlock Grid.Row="0" Text="{Binding Name}" VerticalAlignment="Center"/>
+							<TextBlock Grid.Row="1" Text="{Binding Artist}" VerticalAlignment="Center"/>
+						</Grid>
+						<TextBlock Grid.Column="2" Text="{Binding DurationString}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+					</Grid>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
+		</ListBox>
 	</Grid>
 </Window>
