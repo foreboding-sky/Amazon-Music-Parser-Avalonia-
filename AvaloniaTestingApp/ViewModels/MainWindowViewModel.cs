@@ -28,6 +28,7 @@ namespace AvaloniaTestingApp.ViewModels
             get => url;
             set => this.RaiseAndSetIfChanged(ref url, value);
         }
+
         PlaylistModel _playlistModel;
         PlaylistModel Playlist
         { 
@@ -38,18 +39,30 @@ namespace AvaloniaTestingApp.ViewModels
         public MainWindowViewModel() 
         {
             Playlist= new PlaylistModel();
-            Url = "https://music.amazon.com/playlists/B01M11SBC8";
+            //Url = "https://music.amazon.com/playlists/B01M11SBC8";
+            Url = "https://music.amazon.com/albums/B001230JXC";
         }
+
         public void ParseUrl()
         {
-            Playlist = ParseAmazonPlaylist(Url);
+            if(url.Contains("albums"))
+            {
+                Playlist = ParseAmazonAlbum(Url);
+                return;
+            }
+                
+            if (url.Contains("playlists"))
+            {
+                Playlist = ParseAmazonPlaylist(Url);
+                return;
+            }
         }
 
         public PlaylistModel ParseAmazonPlaylist(string url)
         {
             IWebDriver driver = new ChromeDriver();
             driver.Navigate().GoToUrl(url);
-            System.Threading.Thread.Sleep(2000); //wait for website to load
+            System.Threading.Thread.Sleep(2000); //wait for website to load, async method should be used instead
 
             PlaylistModel playlist = new PlaylistModel();
             playlist.Songs = new List<SongModel>();
@@ -85,6 +98,58 @@ namespace AvaloniaTestingApp.ViewModels
 
                 //get song image
                 imgBytes = wc.DownloadData(node.Attributes["image-src"].Value);
+                stream = new MemoryStream(imgBytes);
+                song.Image = Avalonia.Media.Imaging.Bitmap.DecodeToWidth(stream, 50);
+
+                //get song duration
+                string[] time = node.InnerHtml.Split("col4")[1].Split("title=\"")[1].Split("\"")[0].Split(":");
+                song.Duration = new TimeOnly(0, int.Parse(time[0]), int.Parse(time[1]));
+
+                playlist.Songs.Add(song);
+            }
+            return playlist;
+        }
+
+        public PlaylistModel ParseAmazonAlbum(string url)
+        {
+            IWebDriver driver = new ChromeDriver();
+            driver.Navigate().GoToUrl(url);
+            System.Threading.Thread.Sleep(2000); //wait for website to load, async method should be used instead
+
+            PlaylistModel playlist = new PlaylistModel();
+            playlist.Songs = new List<SongModel>();
+
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(driver.FindElement(By.TagName("body")).GetAttribute("outerHTML"));
+
+            //get playlist data from shadow-root
+            var shadowHost = driver.FindElement(By.XPath("//*[@id=\"root\"]/music-app/div[3]/div/div/div/music-detail-header"));
+            var shadowRoot = shadowHost.GetShadowRoot();
+            var shadowContent = shadowRoot.FindElement(By.ClassName("container"));
+
+            //set up playlist data
+            string[] tmp = shadowContent.Text.Split("\n");
+            playlist.Name = tmp[1].Split("\r")[0];
+            playlist.Description = tmp[3].Split("\r")[0];
+
+            //get playlist image bitmap
+            WebClient wc = new WebClient();
+            byte[] imgBytes = wc.DownloadData(shadowHost.GetAttribute("image-src").ToString());
+            Stream stream = new MemoryStream(imgBytes);
+            playlist.Image = Avalonia.Media.Imaging.Bitmap.DecodeToWidth(stream, 200);
+
+            var nodes = doc.DocumentNode.SelectNodes("//music-container/div/div[2]/div/div/music-text-row");
+            foreach (var node in nodes)
+            {
+                SongModel song = new SongModel();
+
+                //set up song data
+                song.Name = node.Attributes["primary-text"].Value;
+                song.Artist = tmp[2].Split("\r")[0];
+                song.Album = ""; //or use following line of code to display album name on song: tmp[1].Split("\r")[0];
+
+                //get song image, same as album's
+                imgBytes = wc.DownloadData(shadowHost.GetAttribute("image-src").ToString());
                 stream = new MemoryStream(imgBytes);
                 song.Image = Avalonia.Media.Imaging.Bitmap.DecodeToWidth(stream, 50);
 
