@@ -45,16 +45,19 @@ namespace AvaloniaTestingApp.ViewModels
 
         public void ParseUrl()
         {
-            if(url.Contains("albums"))
+            if(url.Contains("music.amazon.com"))
             {
-                Playlist = ParseAmazonAlbum(Url);
-                return;
-            }
-                
-            if (url.Contains("playlists"))
-            {
-                Playlist = ParseAmazonPlaylist(Url);
-                return;
+                if (url.Contains("albums"))
+                {
+                    Playlist = ParseAmazonAlbum(Url);
+                    return;
+                }
+
+                if (url.Contains("playlists"))
+                {
+                    Playlist = ParseAmazonPlaylist(Url);
+                    return;
+                }
             }
         }
 
@@ -62,7 +65,7 @@ namespace AvaloniaTestingApp.ViewModels
         {
             IWebDriver driver = new ChromeDriver();
             driver.Navigate().GoToUrl(url);
-            System.Threading.Thread.Sleep(2000); //wait for website to load, async method should be used instead
+            System.Threading.Thread.Sleep(2000); //wait for website to load, async url load method should be used instead
 
             PlaylistModel playlist = new PlaylistModel();
             playlist.Songs = new List<SongModel>();
@@ -110,11 +113,11 @@ namespace AvaloniaTestingApp.ViewModels
             return playlist;
         }
 
-        public PlaylistModel ParseAmazonAlbum(string url)
+        public  PlaylistModel ParseAmazonAlbum(string url)
         {
             IWebDriver driver = new ChromeDriver();
             driver.Navigate().GoToUrl(url);
-            System.Threading.Thread.Sleep(2000); //wait for website to load, async method should be used instead
+            System.Threading.Thread.Sleep(2000); //wait for website to load, async url load method should be used instead
 
             PlaylistModel playlist = new PlaylistModel();
             playlist.Songs = new List<SongModel>();
